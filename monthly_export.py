@@ -11,6 +11,8 @@ import json
 import io
 import boto3
 import gspread
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from google.oauth2.service_account import Credentials
