@@ -212,16 +212,14 @@ async def webhook(request: Request):
         if not isinstance(event.message, ImageMessageContent):
             continue
 
+        user_id  = event.source.user_id
+        group_id = getattr(event.source, "group_id", None)
+        print(f"[WEBHOOK] user_id={user_id} group_id={group_id}")
+
         now_jst = datetime.fromtimestamp(event.timestamp / 1000, tz=JST)
         check_type = get_check_type(now_jst)
         if check_type is None:
             continue
-
-        user_id  = event.source.user_id
-        group_id = getattr(event.source, "group_id", None)
-
-        # 管理者登録用: user_idをログに出力（初回設定時に確認する）
-        print(f"[WEBHOOK] user_id={user_id} group_id={group_id}")
 
         if group_id:
             display_name = get_group_member_display_name(group_id, user_id)
