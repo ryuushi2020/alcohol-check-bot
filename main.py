@@ -71,15 +71,24 @@ def get_image_content(message_id: str) -> bytes:
     return res.content
 
 # --- Google Drive に写真保存 ---
+DRIVE_OWNER_EMAIL = os.environ.get("DRIVE_OWNER_EMAIL", "katsuto.uehara@gmail.com")
+
 def upload_to_drive(image_bytes: bytes, filename: str, creds: Credentials) -> str:
     import io
     drive = build("drive", "v3", credentials=creds)
     file_metadata = {"name": filename, "parents": [DRIVE_FOLDER_ID]}
     media = MediaIoBaseUpload(io.BytesIO(image_bytes), mimetype="image/jpeg")
     f = drive.files().create(body=file_metadata, media_body=media, fields="id, webViewLink").execute()
+    file_id = f["id"]
+    # オーナーをGoogleアカウントに移転（サービスアカウントはクォータゼロのため必須）
+    drive.permissions().create(
+        fileId=file_id,
+        body={"type": "user", "role": "owner", "emailAddress": DRIVE_OWNER_EMAIL},
+        transferOwnership=True,
+    ).execute()
     # 公開設定（閲覧可能リンク）
     drive.permissions().create(
-        fileId=f["id"],
+        fileId=file_id,
         body={"type": "anyone", "role": "reader"},
     ).execute()
     return f["webViewLink"]
