@@ -82,13 +82,8 @@ def upload_to_r2(image_bytes: bytes, filename: str) -> str:
         Body=image_bytes,
         ContentType="image/jpeg",
     )
-    # 署名付きURL（1時間有効）— スプレッドシートから閲覧可能
-    url = s3.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": R2_BUCKET_NAME, "Key": filename},
-        ExpiresIn=3600,
-    )
-    return url
+    # ファイル名だけ返す（月次エクスポート時にR2から取得する）
+    return filename
 
 # --- スプレッドシート更新 ---
 def update_sheet(creds: Credentials, date_str: str, name: str, check_type: str, time_str: str, photo_url: str):
